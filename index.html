@@ -1,0 +1,113 @@
+<html lang="en" data-bs-theme="dark">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Kapitalism Mission Editor 0.0.1</title>
+    <script src="
+https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js
+"></script>
+    <script src="
+https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js
+"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <style>
+        body {
+            width: 1000%;
+            margin: 0px;
+            padding: 0px;
+        }
+
+        .contentArea {
+            margin: 10px;
+        }
+        .navbar {
+            position: sticky;
+            left: 0px;
+            top: 0px;
+            width: 100vw;
+        }
+
+        .holder {
+            display: flex;
+            flex-direction: row;
+        }
+    </style>
+    <script>
+        var S4 = function () {
+            return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
+        };
+        globalThis.RandomID = function (len) {
+            var str = ""
+            for (let i = 0; i < len; i++) {
+                str = `${str}${S4()}`
+            }
+            return str
+        }
+        globalThis.plugins = {
+            list: {
+                "plugin name": {
+                    start: function () {
+
+                    }
+                }
+            },
+            loadFromURL: function (url) {
+                var xhr = new XMLHttpRequest();
+                xhr.addEventListener("readystatechange", function () {
+                    if (this.readyState === 4) {
+                        var pluginInfo = JSON.parse(this.responseText)
+
+                        var xhrindexjs = new XMLHttpRequest();
+                        xhrindexjs.addEventListener("readystatechange", function () {
+                            if (this.readyState === 4) {
+                                globalThis.plugins.list[pluginInfo.name] = {
+                                    start: new Function(this.responseText)
+                                }
+                                globalThis.plugins.startPlugin(pluginInfo.name)
+                            }
+                        });
+                        xhrindexjs.open("Get", pluginInfo.indexjs);
+                        xhrindexjs.setRequestHeader
+                        xhrindexjs.send();
+                    }
+                });
+                xhr.open("Get", url);
+                xhr.send();
+            },
+            startPlugin: function(name){
+                globalThis.plugins.list[name].start();
+            }
+        }
+
+        window.onload = (event) => {
+
+        };
+    </script>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg bg-body-tertiary" style="z-index: 2;">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/">Kapitalism Mission Editor<br>v0.0.1</a>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                </ul>
+            </div>
+        </div>
+
+    </nav>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
+        integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js"
+        integrity="sha384-BBtl+eGJRgqQAUMxJ7pMwbEyER4l1g+O15P+16Ep7Q9Q+zqX6gSbd85u4mG4QzX+"
+        crossorigin="anonymous"></script>
+</body>
+
+</html>
+
+
+  
+  
