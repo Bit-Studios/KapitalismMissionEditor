@@ -14,14 +14,29 @@ https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js
         integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
     <style>
         body {
-            width: 1000%;
+            width: 100%;
             margin: 0px;
             padding: 0px;
+            overflow: hidden;
         }
 
         .contentArea {
             margin: 10px;
+            display: flex;
+            gap: 10px;
+            flex-direction: row;
+
+            height: calc(100% - 110px);
         }
+
+        .panel {
+            padding: 10px;
+            width: 100%;
+            height: 100%;
+            background-color: #d9d9d90f;
+            border-radius: 10px
+        }
+
         .navbar {
             position: sticky;
             left: 0px;
@@ -32,6 +47,11 @@ https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js
         .holder {
             display: flex;
             flex-direction: row;
+        }
+
+        .StageList {
+            max-height: 400px;
+            overflow-y: scroll;
         }
     </style>
     <script>
@@ -76,7 +96,7 @@ https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js
                 xhr.open("Get", url);
                 xhr.send();
             },
-            startPlugin: function(name){
+            startPlugin: function (name) {
                 globalThis.plugins.list[name].start();
             }
         }
@@ -84,6 +104,408 @@ https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js
         window.onload = (event) => {
 
         };
+
+        globalThis.Data = {
+            Mission: {
+                ID: "",
+                Name: "",
+                Description: "",
+                Stages: [
+                    {
+                        Name: "",
+                        Description: "",
+                        Objective: "",
+                        DisplayObjective: true,
+                        Conditions: [
+                            {
+                                "$type": "KSP.Game.Missions.PropertyCondition, Assembly-CSharp",
+                                "RequireCurrentValue": true,
+                                "valueMet": false,
+                                "PropertyTypeAQN": "KSP.Messages.PropertyWatchers.VesselSOIPropertyWatcher, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+                                "TestWatchedValue": 0.0,
+                                "TestWatchedstring": "Kerbin",
+                                "TestWatchedInt": 0,
+                                "TestWatchedBool": true,
+                                "propOperator": "EQUAL",
+                                "isInput": false,
+                                "Inputstring": "",
+                                "ConditionType": "PropertyCondition"
+                            }
+                        ],
+                        "ConditionMode": "AND",
+                        "ConditionType": "ConditionSet"
+                    }
+                ]
+            },
+            Variables: {
+
+            }
+        }
+        globalThis.Data.Mission = {
+            ID: "",
+            Name: "",
+            Description: "",
+            Stages: []
+        }
+        globalThis.Data.Variables = {}
+        //stage logic
+        /**
+        * The index of stage
+        */
+        globalThis.SelectedStage = 0;
+        globalThis.stageIDX = 0;
+        /**
+        * Add a new stage
+        * @constructor
+        */
+        globalThis.AddStage = function () {
+            var StageList = document.getElementById("StageList")
+            StageList.innerHTML = `${StageList.innerHTML}
+            <div class="card" id="Stage_${globalThis.stageIDX}" style="width: 100%">
+                <div class="card-body"
+                    style="display: flex;width: 100% !important; flex-direction: row;gap:20px">
+                    <h5 class="card-title">Stage ${globalThis.stageIDX}</h5>
+                    <button class="btn btn-primary" onclick="globalThis.EditObject( ${globalThis.stageIDX})" style="position: absolute;right:120px">Edit</button>
+                    <button class="btn btn-danger" onclick="globalThis.RemoveStage( ${globalThis.stageIDX})" style="position: absolute;right:20px">Remove</button>
+                </div>
+            </div>`
+            globalThis.Data.Mission.Stages.push({
+                Name: "",
+                Description: "",
+                Objective: "",
+                DisplayObjective: true,
+                Conditions: [],
+                "ConditionMode": "AND",
+                "ConditionType": "ConditionSet"
+            })
+            globalThis.stageIDX++
+        }
+        globalThis.RemoveStage = function (ID = 0) {
+            var StageList = document.getElementById("StageList")
+            var os = 0;
+            for (var s = 0; s < globalThis.stageIDX; s++) {
+                var Stage = document.getElementById(`Stage_${s}`)
+
+                if (s == ID) {
+                    if (ID == globalThis.SelectedStage) {
+                        var ObjectEditor = document.getElementById("ObjectEditor")
+                        ObjectEditor.innerHTML = ``
+                    }
+                    globalThis.Data.Mission.Stages.splice(s, 1);
+                    StageList.removeChild(Stage)
+                    os--
+                } else {
+                    Stage.id = `Stage_${s + os}`
+                    Stage.innerHTML = `<div class="card-body"
+                    style="display: flex;width: 100% !important; flex-direction: row;gap:20px">
+                    <h5 class="card-title">Stage ${s + os}</h5>
+                    <button class="btn btn-primary" onclick="globalThis.EditObject( ${s + os})" style="position: absolute;right:120px">Edit</button>
+                    <button class="btn btn-danger" onclick="globalThis.RemoveStage( ${s + os})" style="position: absolute;right:20px">Remove</button>
+                </div>`
+                }
+            }
+            globalThis.stageIDX--
+        }
+        globalThis.EditObject = function (ID) {
+            globalThis.SelectedStage = ID;
+            var ObjectEditor = document.getElementById("ObjectEditor")
+            globalThis.ConditionIDX = globalThis.Data.Mission.Stages[ID].Conditions.length
+            globalThis.SelectedCondition = 0
+            ObjectEditor.innerHTML = `
+            <div class="input-group input-group-sm mb-3">
+                    <span class="input-group-text" id="inputGroup-Stage-Name">Name</span>
+                    <input type="text" class="form-control" aria-label="Stage Name"
+                        aria-describedby="inputGroup-Stage-Name" placeholder="Stage Name">
+                </div>
+                <div class="input-group input-group-sm mb-3">
+                    <span class="input-group-text" id="inputGroup-Stage-Description">Description</span>
+                    <input type="text" class="form-control" aria-label="Stage Description"
+                        aria-describedby="inputGroup-Stage-Description" placeholder="Stage Description">
+                </div>
+                <div class="input-group input-group-sm mb-3">
+                    <span class="input-group-text" id="inputGroup-Stage-Objective">Objective</span>
+                    <input type="text" class="form-control" aria-label="Stage Objective"
+                        aria-describedby="inputGroup-Stage-Objective" placeholder="Stage Objective">
+                </div>
+                <div class="StageConditions">
+                    <h5>Stage Conditions</h5>
+                    <div id="StageConditionsList" class="StageList" style="padding: 10px;">
+
+                    </div>
+                    <div class="StageConditionAdd" style="width: 100%;display: flex;flex-direction: row-reverse;">
+                        <button class="btn btn-primary" onclick="globalThis.AddStageCondition()">Add</button>
+                    </div>
+                </div>
+            `
+            globalThis.UpdateStageConditionList()
+        }
+
+        //condition logic
+        globalThis.SelectedCondition = 0;
+        globalThis.ConditionIDX = 0;
+        globalThis.UpdateStageConditionList = function () {
+            var StageConditionList = document.getElementById("StageConditionsList")
+            StageConditionList.innerHTML = ``
+            globalThis.Data.Mission.Stages[globalThis.SelectedStage].Conditions.forEach(condition => {
+                StageConditionList.innerHTML = `${StageConditionList.innerHTML}
+            <div class="card" id="StageCondition_${globalThis.Data.Mission.Stages[globalThis.SelectedStage].Conditions.indexOf(condition)}" style="width: 100%">
+                <div class="card-body"
+                    style="display: flex;width: 100% !important; flex-direction: row;gap:20px">
+                    <h5 class="card-title">Condition ${globalThis.Data.Mission.Stages[globalThis.SelectedStage].Conditions.indexOf(condition)}</h5>
+                    <button class="btn btn-primary" onclick="globalThis.EditObjectCondition( ${globalThis.Data.Mission.Stages[globalThis.SelectedStage].Conditions.indexOf(condition)})" style="position: absolute;right:120px">Edit</button>
+                    <button class="btn btn-danger" onclick="globalThis.RemoveStageCondition( ${globalThis.Data.Mission.Stages[globalThis.SelectedStage].Conditions.indexOf(condition)})" style="position: absolute;right:20px">Remove</button>
+                </div>
+            </div>`
+            })
+        }
+        globalThis.AddStageCondition = function () {
+            var StageConditionList = document.getElementById("StageConditionsList")
+            StageConditionList.innerHTML = `${StageConditionList.innerHTML}
+            <div class="card" id="StageCondition_${globalThis.ConditionIDX}" style="width: 100%">
+                <div class="card-body"
+                    style="display: flex;width: 100% !important; flex-direction: row;gap:20px">
+                    <h5 class="card-title">Condition ${globalThis.ConditionIDX}</h5>
+                    <button class="btn btn-primary" onclick="globalThis.EditObjectCondition( ${globalThis.ConditionIDX})" style="position: absolute;right:120px">Edit</button>
+                    <button class="btn btn-danger" onclick="globalThis.RemoveStageCondition( ${globalThis.ConditionIDX})" style="position: absolute;right:20px">Remove</button>
+                </div>
+            </div>`
+            globalThis.Data.Mission.Stages[globalThis.SelectedStage].Conditions.push({
+                "$type": "KSP.Game.Missions.PropertyCondition, Assembly-CSharp",
+                "RequireCurrentValue": true,
+                "valueMet": false,
+                "PropertyTypeAQN": "",
+                "TestWatchedValue": 0.0,
+                "TestWatchedstring": "",
+                "TestWatchedInt": 0,
+                "TestWatchedBool": true,
+                "propOperator": "EQUAL",
+                "isInput": false,
+                "Inputstring": "",
+                "ConditionType": "PropertyCondition"
+            })
+            globalThis.ConditionIDX++
+        }
+        globalThis.RemoveStageCondition = function (ID = 0) {
+
+
+            var StageConditionList = document.getElementById("StageConditionsList")
+            var os = 0;
+            for (var s = 0; s < globalThis.ConditionIDX; s++) {
+                var Stage = document.getElementById(`StageCondition_${s}`)
+
+                if (s == ID) {
+                    globalThis.Data.Mission.Stages[globalThis.SelectedStage].Conditions.splice(s, 1);
+                    StageConditionList.removeChild(Stage)
+                    os--
+                } else {
+                    Stage.id = `StageCondition_${s + os}`
+                    Stage.innerHTML = `
+                    <div class="card-body"
+                    style="display: flex;width: 100% !important; flex-direction: row;gap:20px">
+                    <h5 class="card-title">Condition ${s + os}</h5>
+                    <button class="btn btn-primary" onclick="globalThis.EditObjectCondition( ${s + os})" style="position: absolute;right:120px">Edit</button>
+                    <button class="btn btn-danger" onclick="globalThis.RemoveStageCondition( ${s + os})" style="position: absolute;right:20px">Remove</button>
+                </div>`
+                }
+            }
+
+            globalThis.ConditionIDX--
+        }
+        globalThis.PropertyTypeAQN = [
+            "CameraPropertyWatcher",
+            "ActiveCameraGroupPropertyWatcher",
+            "CameraGimbalPropertyWatcher",
+            "CameraGimbalPitchPropertyWatcher",
+            "CameraGimbalHeadingPropertyWatcher",
+            "CameraGimbalDistancePropertyWatcher",
+            "CameraLocalRollPropertyWatcher",
+            "CameraLocalPitchPropertyWatcher",
+            "CameraLocalYawPropertyWatcher",
+            "CameraUnderWaterPropertyWatcher",
+            "EVAPropertyWatcher",
+            "EVAKerbalSituationPropertyWatcher",
+            "FlightPropertyWatcher",
+            "FlightVehicleDistanceFromPosition",
+            "FlightVehicleAltitudeDiffFromPosition",
+            "FlightVehicleLongitudeDiffFromPosition",
+            "FlightVehicleLatitudeDiffFromPosition",
+            "TimeFromApoapsisAtOrbitClick",
+            "InputHeldRollLeftDuration",
+            "InputHeldRollRightDuration",
+            "InputHeldYawLeftDuration",
+            "InputHeldYawRightDuration",
+            "InputHeldPitchDownDuration",
+            "InputHeldPitchUpDuration",
+            "GamePropertyWatcher",
+            "CurrentGameStatePropertyWatcher",
+            "LastGameStatePropertyWatcher",
+            "CelestialBodyDiscoveredPropertyWatcher",
+            "TechUnlockedDiscoveredPropertyWatcher",
+            "TimeOfDayPropertyWatcher",
+            "CelestialBodySelected",
+            "CelestialBodyContextMenuOpened",
+            "ManeuverPropertyWatcher",
+            "ManeuverPlanEntersSOI",
+            "ManeuverETA",
+            "MapPropertyWatcher",
+            "MapEnabled",
+            "MissionDataPropertyWatcher",
+            "MissionActiveStagePropertyWatcher",
+            "OtherFTUEMissionLastStageCompleted",
+            "OtherMissionLastStageCompleted",
+            "OtherTutorialLastStageCompleted",
+            "OABPropertyWatcher",
+            "OABLastPartPlacedPropertyWatcher",
+            "LastPartAttachedTo",
+            "OABCategorySelectedPropertyWatcher",
+            "OABLastPartSelectedPropertyWatcher",
+            "OABLastPartDeletedPropertyWatcher",
+            "OABCurrentSymmetryValuePropertyWatcher",
+            "OABPartOnMainAssemblyPropertyWatcher",
+            "OABXAxisLastPartPlacedOffsetHighlightPropertyWatcher",
+            "OABYAxisLastPartPlacedOffsetHighlightPropertyWatcher",
+            "OABZAxisLastPartPlacedOffsetHighlightPropertyWatcher",
+            "OABXAxisCenterOfLiftOffsetCenterOfMassPropertyWatcher",
+            "OABYAxisCenterOfLiftOffsetCenterOfMassPropertyWatcher",
+            "OABZAxisCenterOfLiftOffsetCenterOfMassPropertyWatcher",
+            "OABWorkspaceFileLoadedPropertyWatcher",
+            "OABWorkspaceFileSelectedPropertyWatcher",
+            "PartInStage",
+            "StageNumberAdded",
+            "StageNumberRemoved",
+            "TripPlannerCelestialBodyTarget",
+            "VehicleWithinBuildBounds",
+            "OABLastPartSelectedInStagingStackPropertyWatcher",
+            "ProceduralWingPropertyWatcher",
+            "ProceduralWingSpanPropertyWatcher",
+            "ProceduralWingAnglePropertyWatcher",
+            "ProceduralWingTipAnglePropertyWatcher",
+            "ProceduralWingTipThicknessPropertyWatcher",
+            "ProceduralWingTipLengthPropertyWatcher",
+            "ProceduralWingRootThicknessPropertyWatcher",
+            "ProceduralWingRootLengthPropertyWatcher",
+            "ProceduralControlSurfaceSpanPropertyWatcher",
+            "ProceduralControlSurfaceChordLengthPropertyWatcher",
+            "ProceduralControlSurfacePositionPropertyWatcher",
+            "ProceduralWingControlSurfaceChordLengthPropertyWatcher",
+            "ProceduralWingControlSurfaceStatusPropertyWatcher",
+            "PropertyWatcher",
+            "SciencePropertyWatcher",
+            "ScienceResearchTypePropertyWatcher",
+            "VehiclePropertyWatcher",
+            "VehicleYawedDegrees",
+            "VehiclePitchedDegrees",
+            "VehicleRolledDegrees",
+            "VehicleTrimPitchPropertyWatcher",
+            "VehicleTrimYawPropertyWatcher",
+            "VehicleTrimRollPropertyWatcher",
+            "VesselSeaLevelAltitudePropertyWatcher",
+            "VesselGroundLevelAltitudePropertyWatcher",
+            "VehiclePeriapsisAltitudePropertyWatcher",
+            "VehicleApoapsisAltitudePropertyWatcher",
+            "VehicleSituationAltitudePropertyWatcher",
+            "VehicleAtmosphericPressurePropertyWatcher",
+            "VehicleSituationBiomePropertyWatcher",
+            "VesselOrbitSpeedPropertyWatcher",
+            "VesselSurfaceSpeedPropertyWatcher",
+            "VesselTargetSpeedPropertyWatcher",
+            "VesselTargetDistancePropertyWatcher",
+            "VesselSOIPropertyWatcher",
+            "VesselHasEnteredSOIPropertyWatcher",
+            "VesselAudioSOIPropertyWatcher",
+            "VesselHasLandedOnCBPropertyWatcher",
+            "IsDestroyedByCbCollision",
+            "EscapeTrajectorySOIPredictedPropertyWatcher",
+            "TimeZoomStepSelectedPropertyWatcher",
+            "TimeZoomSpeedSelectedPropertyWatcher",
+            "SASMode",
+            "Throttle",
+            "PartActivated",
+            "VehicleStageCountPropertyWatcher",
+            "VehicleResourceWeightPropertyWatcher",
+            "VesselFuelLevelPropertyWatcher",
+            "StageFuelLevelPropertyWatcher",
+            "VehicleCargoWeightPropertyWatcher",
+            "VehicleResourceTypesPresentPropertyWatcher",
+            "VehiclesDockedCountPropertyWatcher",
+            "VehicleBoundingSphereRadiusPropertyWatcher",
+            "VehicleLatitudePropertyWatcher",
+            "VehicleLongitudePropertyWatcher",
+            "VehicleHeadingPropertyWatcher",
+            "VehiclePartInContactWithGroundSurfacePropertyWatcher",
+            "VehicleBrakingListener",
+            "VehicleVesselDeltaV",
+            "CelestialBodyTarget",
+            "PlannedManeuverApoapsis",
+            "TimeFromApoapsis",
+            "HasCommand",
+            "PartCount",
+            "IsActiveVessel",
+            "HasPart",
+            "HasPartInGroup",
+            "ActiveVehicleTargetCelestialBody",
+            "OrbitEccentricity",
+            "OrbitInclination",
+            "ElectricityLevel",
+            "ElectricChargeProductionRate",
+            "CrewCount",
+            "VesselMass",
+            "SpeedMaintained",
+            "WheelCount",
+            "HasScoredResearchReport",
+            "HasStoredResearchReport",
+            "VesselResearchLocation",
+            "HasBeenToResearchLocation",
+            "CurrentScienceAvailable",
+            "IsActiveVesselEva",
+            "LoopPlayerVideoPropertyWatcher"]
+
+        globalThis.EditObjectCondition = function (ID) {
+            globalThis.SelectedCondition = ID
+            var ObjectEditor = document.getElementById("ObjectEditor")
+            var options = ``
+            PropertyTypeAQN.forEach(ptaqn => {
+                options = `${options}
+                <option>${ptaqn}</option>
+                `
+            })
+            ObjectEditor.innerHTML = `
+            <div class="input-group input-group-sm mb-3">
+                    <span class="input-group-text" id="inputGroup-PropertyTypeAQN">Property Type</span>
+                    <select class="form-select" id="PropertyTypeAQN" aria-describedby="inputGroup-PropertyTypeAQN" placeholder="Select Property Type">
+                        ${options}
+                    </select>
+                </div>
+                <div class="input-group input-group-sm mb-3">
+                    <span class="input-group-text" id="inputGroup-TestWatchedValue">Test Watched Value</span>
+                    <input type="number" class="form-control" 
+                        aria-describedby="inputGroup-TestWatchedValue" placeholder="Double">
+                </div>
+                <div class="input-group input-group-sm mb-3">
+                    <span class="input-group-text" id="inputGroup-TestWatchedstring">Test Watched string</span>
+                    <input type="text" class="form-control" 
+                        aria-describedby="inputGroup-TestWatchedstring" placeholder="String">
+                </div>
+                <div class="input-group input-group-sm mb-3">
+                    <span class="input-group-text" id="inputGroup-TestWatchedInt">Test Watched Int</span>
+                    <input type="number" class="form-control" 
+                        aria-describedby="inputGroup-TestWatchedInt" placeholder="Int">
+                </div>
+                <div class="form-check">
+                    <label  class="form-check-label" for="inputGroup-TestWatchedBool">Test Watched Bool</span>
+                    <input type="checkbox" class="form-check-input" checked
+                    id="inputGroup-TestWatchedBool" placeholder="Mission Description">
+                </div>
+                <div class="input-group input-group-sm mb-3">
+                    <span class="input-group-text" id="inputGroup-propOperator">Operator</span>
+                    <select class="form-select" id="propOperator" aria-describedby="inputGroup-propOperator" placeholder="Select Operator">
+                        <option>EQUAL</option>
+                        <option>GREATER</option>
+                        <option>LESSER</option>
+                    </select>
+                </div>
+            `
+        }
     </script>
 </head>
 
@@ -93,11 +515,87 @@ https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js
             <a class="navbar-brand" href="/">Kapitalism Mission Editor<br>v0.0.1</a>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <div style="display: flex; flex-direction: column;">
+                            <div class="btn-group" role="group" aria-label="ToolBar" style="margin-left: 10px;">
+                                <button type="button" class="btn btn-outline-success" id="ImportTree"
+                                    onclick="globalThis.ImportGF()">Import Game Files</button>
+                                <button type="button" class="btn btn-outline-success" id="ImportTree"
+                                    onclick="globalThis.ExportGF()">Export Game Files</button>
+                                <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal"
+                                    data-bs-target="#pluginModal">
+                                    Add Plugin
+                                </button>
+                                <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal"
+                                    data-bs-target="#HowToIntroModel">
+                                    How to use this editor
+                                </button>
+                            </div>
+                        </div>
+                    </li>
                 </ul>
             </div>
         </div>
 
     </nav>
+    <div id="contentArea" class="contentArea">
+        <div class="panel" id="Mbox1">
+            <h4>Layout Editor</h4>
+            <div class="input-group input-group-sm mb-3">
+                <span class="input-group-text" id="inputGroup-Mission-ID">ID</span>
+                <input type="text" class="form-control" aria-label="Mission ID" aria-describedby="inputGroup-Mission-ID"
+                    placeholder="Mission ID">
+
+            </div>
+            <div class="input-group input-group-sm mb-3">
+                <span class="input-group-text" id="inputGroup-Mission-Name">Name</span>
+                <input type="text" class="form-control" aria-label="Mission Name"
+                    aria-describedby="inputGroup-Mission-Name" placeholder="Mission Name">
+            </div>
+            <div class="input-group input-group-sm mb-3">
+                <span class="input-group-text" id="inputGroup-Mission-Description">Description</span>
+                <input type="text" class="form-control" aria-label="Mission Description"
+                    aria-describedby="inputGroup-Mission-Description" placeholder="Mission Description">
+            </div>
+            <div class="Stages">
+                <h5>Mission Stages</h5>
+                <div id="StageList" class="StageList" style="padding: 10px;">
+
+                </div>
+                <div class="StageAdd" style="width: 100%;display: flex;flex-direction: row-reverse;">
+                    <button class="btn btn-primary" onclick="globalThis.AddStage()">Add</button>
+                </div>
+            </div>
+            <h5>Mission Rewards</h5>
+            <div class="input-group">
+                <span class="input-group-text">Science</span>
+                <input type="number" aria-label="Low" class="form-control" placeholder="Scale low">
+                <input type="number" aria-label="High" class="form-control" placeholder="Scale high">
+                <input type="text" aria-label="Value" class="form-control" placeholder="Scale value">
+            </div>
+            <div class="input-group">
+                <span class="input-group-text">Funds   </span>
+                <input type="number" aria-label="Low" class="form-control" placeholder="Scale low">
+                <input type="number" aria-label="High" class="form-control" placeholder="Scale high">
+                <input type="text" aria-label="Value" class="form-control" placeholder="Scale value">
+            </div>
+            <div class="input-group">
+                <span class="input-group-text">Budget</span>
+                <input type="number" aria-label="Low" class="form-control" placeholder="Scale low">
+                <input type="number" aria-label="High" class="form-control" placeholder="Scale high">
+                <input type="text" aria-label="Value" class="form-control" placeholder="Scale value">
+            </div>
+        </div>
+        <div class="panel" id="Mbox2">
+            <h4>Object Editor</h4>
+            <div id="ObjectEditor">
+
+            </div>
+        </div>
+        <div class="panel" id="Mbox3">
+            <h4>Variable Editor</h4>
+        </div>
+    </div>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
         integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r"
         crossorigin="anonymous"></script>
@@ -107,7 +605,3 @@ https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js
 </body>
 
 </html>
-
-
-  
-  
