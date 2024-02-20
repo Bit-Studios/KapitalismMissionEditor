@@ -135,7 +135,24 @@ https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js
                         "ConditionMode": "AND",
                         "ConditionType": "ConditionSet"
                     }
-                ]
+                ],
+                Rewards: {
+                    "Science": {
+                        "low": "",
+                        "high": "",
+                        "value": ""
+                    },
+                    "Funds": {
+                        "low": "",
+                        "high": "",
+                        "value": ""
+                    },
+                    "Budget": {
+                        "low": "",
+                        "high": "",
+                        "value": ""
+                    }
+                }
             },
             Variables: {
 
@@ -145,9 +162,88 @@ https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js
             ID: "",
             Name: "",
             Description: "",
-            Stages: []
+            Stages: [],
+            Rewards: {
+                "Science": {
+                    "low": "",
+                    "high": "",
+                    "value": ""
+                },
+                "Funds": {
+                    "low": "",
+                    "high": "",
+                    "value": ""
+                },
+                "Budget": {
+                    "low": "",
+                    "high": "",
+                    "value": ""
+                }
+            }
         }
         globalThis.Data.Variables = {}
+
+        globalThis.ValuesUpdated = function () {
+            var StageName = document.getElementById("StageName")
+            var StageDescription = document.getElementById("StageDescription")
+            var StageObjective = document.getElementById("StageObjective")
+
+            var PropertyTypeAQN = document.getElementById("PropertyTypeAQN")
+            var TestWatchedValue = document.getElementById("TestWatchedValue")
+            var TestWatchedstring = document.getElementById("TestWatchedstring")
+            var TestWatchedInt = document.getElementById("TestWatchedInt")
+            var TestWatchedBool = document.getElementById("inputGroup-TestWatchedBool")
+            var propOperator = document.getElementById("propOperator")
+
+            var MissionID = document.getElementById("MissionID")
+            var MissionName = document.getElementById("MissionName")
+            var MissionDescription = document.getElementById("MissionDescription")
+
+            var ScienceScaleLow = document.getElementById("ScienceScaleLow")
+            var ScienceScaleHigh = document.getElementById("ScienceScaleHigh")
+            var ScienceScaleValue = document.getElementById("ScienceScaleValue")
+
+            var FundsScaleLow = document.getElementById("FundsScaleLow")
+            var FundsScaleHigh = document.getElementById("FundsScaleHigh")
+            var FundsScaleValue = document.getElementById("FundsScaleValue")
+
+            var BudgetScaleLow = document.getElementById("BudgetScaleLow")
+            var BudgetScaleHigh = document.getElementById("BudgetScaleHigh")
+            var BudgetScaleValue = document.getElementById("BudgetScaleValue")
+
+
+            globalThis.Data.Mission.ID = MissionID.value
+            globalThis.Data.Mission.Name = MissionName.value
+            globalThis.Data.Mission.Description = MissionDescription.value
+
+            globalThis.Data.Mission.Rewards.Science.low = ScienceScaleLow.value
+            globalThis.Data.Mission.Rewards.Science.high = ScienceScaleHigh.value
+            globalThis.Data.Mission.Rewards.Science.value = ScienceScaleValue.value
+
+            globalThis.Data.Mission.Rewards.Funds.low = FundsScaleLow.value
+            globalThis.Data.Mission.Rewards.Funds.high = FundsScaleHigh.value
+            globalThis.Data.Mission.Rewards.Funds.value = FundsScaleValue.value
+
+            globalThis.Data.Mission.Rewards.Budget.low = BudgetScaleLow.value
+            globalThis.Data.Mission.Rewards.Budget.high = BudgetScaleHigh.value
+            globalThis.Data.Mission.Rewards.Budget.value = BudgetScaleValue.value
+
+            if (StageName == null || StageName == undefined) { } else {
+                globalThis.Data.Mission.Stages[globalThis.SelectedStage].Name = StageName.value
+                globalThis.Data.Mission.Stages[globalThis.SelectedStage].Description = StageDescription.value
+                globalThis.Data.Mission.Stages[globalThis.SelectedStage].Objective = StageObjective.value
+            }
+            if (PropertyTypeAQN == null || PropertyTypeAQN == undefined) { } else {
+                globalThis.Data.Mission.Stages[globalThis.SelectedStage].Conditions[globalThis.SelectedCondition].PropertyTypeAQN = PropertyTypeAQN.value
+                globalThis.Data.Mission.Stages[globalThis.SelectedStage].Conditions[globalThis.SelectedCondition].TestWatchedValue = TestWatchedValue.value
+                globalThis.Data.Mission.Stages[globalThis.SelectedStage].Conditions[globalThis.SelectedCondition].TestWatchedstring = TestWatchedstring.value
+                globalThis.Data.Mission.Stages[globalThis.SelectedStage].Conditions[globalThis.SelectedCondition].TestWatchedInt = TestWatchedInt.value
+                globalThis.Data.Mission.Stages[globalThis.SelectedStage].Conditions[globalThis.SelectedCondition].TestWatchedBool = TestWatchedBool.value
+                globalThis.Data.Mission.Stages[globalThis.SelectedStage].Conditions[globalThis.SelectedCondition].propOperator = propOperator.value
+            }
+
+        }
+
         //stage logic
         /**
         * The index of stage
@@ -214,18 +310,18 @@ https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js
             ObjectEditor.innerHTML = `
             <div class="input-group input-group-sm mb-3">
                     <span class="input-group-text" id="inputGroup-Stage-Name">Name</span>
-                    <input type="text" class="form-control" aria-label="Stage Name"
-                        aria-describedby="inputGroup-Stage-Name" placeholder="Stage Name">
+                    <input type="text" class="form-control" aria-label="Stage Name" onchange="globalThis.ValuesUpdated()"
+                        aria-describedby="inputGroup-Stage-Name" id="StageName" placeholder="Stage Name" value="${globalThis.Data.Mission.Stages[globalThis.SelectedStage].Name}">
                 </div>
                 <div class="input-group input-group-sm mb-3">
                     <span class="input-group-text" id="inputGroup-Stage-Description">Description</span>
-                    <input type="text" class="form-control" aria-label="Stage Description"
-                        aria-describedby="inputGroup-Stage-Description" placeholder="Stage Description">
+                    <input type="text" class="form-control" aria-label="Stage Description" onchange="globalThis.ValuesUpdated()"
+                        aria-describedby="inputGroup-Stage-Description" id="StageDescription" placeholder="Stage Description" value="${globalThis.Data.Mission.Stages[globalThis.SelectedStage].Description}">
                 </div>
                 <div class="input-group input-group-sm mb-3">
                     <span class="input-group-text" id="inputGroup-Stage-Objective">Objective</span>
-                    <input type="text" class="form-control" aria-label="Stage Objective"
-                        aria-describedby="inputGroup-Stage-Objective" placeholder="Stage Objective">
+                    <input type="text" class="form-control" aria-label="Stage Objective" onchange="globalThis.ValuesUpdated()"
+                        aria-describedby="inputGroup-Stage-Objective" id="StageObjective" placeholder="Stage Objective" value="${globalThis.Data.Mission.Stages[globalThis.SelectedStage].Objective}">
                 </div>
                 <div class="StageConditions">
                     <h5>Stage Conditions</h5>
@@ -465,46 +561,59 @@ https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js
             var ObjectEditor = document.getElementById("ObjectEditor")
             var options = ``
             PropertyTypeAQN.forEach(ptaqn => {
-                options = `${options}
+                if (ptaqn == globalThis.Data.Mission.Stages[globalThis.SelectedStage].Conditions[globalThis.SelectedCondition].PropertyTypeAQN) {
+                    options = `${options}
+                <option selected>${ptaqn}</option>
+                `
+                } else {
+                    options = `${options}
                 <option>${ptaqn}</option>
                 `
+                }
+
             })
             ObjectEditor.innerHTML = `
             <div class="input-group input-group-sm mb-3">
                     <span class="input-group-text" id="inputGroup-PropertyTypeAQN">Property Type</span>
-                    <select class="form-select" id="PropertyTypeAQN" aria-describedby="inputGroup-PropertyTypeAQN" placeholder="Select Property Type">
+                    <select class="form-select" id="PropertyTypeAQN" aria-describedby="inputGroup-PropertyTypeAQN" placeholder="Select Property Type" onchange="globalThis.ValuesUpdated()">
                         ${options}
                     </select>
                 </div>
                 <div class="input-group input-group-sm mb-3">
                     <span class="input-group-text" id="inputGroup-TestWatchedValue">Test Watched Value</span>
                     <input type="number" class="form-control" 
-                        aria-describedby="inputGroup-TestWatchedValue" placeholder="Double">
+                        aria-describedby="inputGroup-TestWatchedValue" onchange="globalThis.ValuesUpdated()" id="TestWatchedValue" placeholder="Double" value="${globalThis.Data.Mission.Stages[globalThis.SelectedStage].Conditions[globalThis.SelectedCondition].TestWatchedValue}">
                 </div>
                 <div class="input-group input-group-sm mb-3">
                     <span class="input-group-text" id="inputGroup-TestWatchedstring">Test Watched string</span>
                     <input type="text" class="form-control" 
-                        aria-describedby="inputGroup-TestWatchedstring" placeholder="String">
+                        aria-describedby="inputGroup-TestWatchedstring" onchange="globalThis.ValuesUpdated()" id="TestWatchedstring" placeholder="String" value="${globalThis.Data.Mission.Stages[globalThis.SelectedStage].Conditions[globalThis.SelectedCondition].TestWatchedstring}">
                 </div>
                 <div class="input-group input-group-sm mb-3">
                     <span class="input-group-text" id="inputGroup-TestWatchedInt">Test Watched Int</span>
                     <input type="number" class="form-control" 
-                        aria-describedby="inputGroup-TestWatchedInt" placeholder="Int">
+                        aria-describedby="inputGroup-TestWatchedInt" onchange="globalThis.ValuesUpdated()" id="TestWatchedInt" placeholder="Int" value="${globalThis.Data.Mission.Stages[globalThis.SelectedStage].Conditions[globalThis.SelectedCondition].TestWatchedInt}">
                 </div>
                 <div class="form-check">
                     <label  class="form-check-label" for="inputGroup-TestWatchedBool">Test Watched Bool</span>
                     <input type="checkbox" class="form-check-input" checked
-                    id="inputGroup-TestWatchedBool" placeholder="Mission Description">
+                    id="inputGroup-TestWatchedBool" id="TestWatchedBool" onchange="globalThis.ValuesUpdated()" placeholder="Mission Description" value="${globalThis.Data.Mission.Stages[globalThis.SelectedStage].Conditions[globalThis.SelectedCondition].TestWatchedBool}">
                 </div>
                 <div class="input-group input-group-sm mb-3">
                     <span class="input-group-text" id="inputGroup-propOperator">Operator</span>
-                    <select class="form-select" id="propOperator" aria-describedby="inputGroup-propOperator" placeholder="Select Operator">
+                    <select class="form-select" id="propOperator" onchange="globalThis.ValuesUpdated()" aria-describedby="inputGroup-propOperator" placeholder="Select Operator" value="${globalThis.Data.Mission.Stages[globalThis.SelectedStage].Conditions[globalThis.SelectedCondition].TestWatchedBool}">
                         <option>EQUAL</option>
                         <option>GREATER</option>
                         <option>LESSER</option>
                     </select>
                 </div>
             `
+        }
+        globalThis.ImportGF = function(){
+
+        }
+        globalThis.ExportGF = function(){
+            saveAs(JSON.stringify(globalThis.Data), `${globalThis.Data.Mission.ID}.json`);
         }
     </script>
 </head>
@@ -519,9 +628,9 @@ https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js
                         <div style="display: flex; flex-direction: column;">
                             <div class="btn-group" role="group" aria-label="ToolBar" style="margin-left: 10px;">
                                 <button type="button" class="btn btn-outline-success" id="ImportTree"
-                                    onclick="globalThis.ImportGF()">Import Game Files</button>
+                                    onclick="globalThis.ImportGF()">Import Template Mission</button>
                                 <button type="button" class="btn btn-outline-success" id="ImportTree"
-                                    onclick="globalThis.ExportGF()">Export Game Files</button>
+                                    onclick="globalThis.ExportGF()">Export Template Mission</button><!-- 
                                 <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal"
                                     data-bs-target="#pluginModal">
                                     Add Plugin
@@ -529,7 +638,7 @@ https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js
                                 <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal"
                                     data-bs-target="#HowToIntroModel">
                                     How to use this editor
-                                </button>
+                                </button> -->
                             </div>
                         </div>
                     </li>
@@ -543,19 +652,21 @@ https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js
             <h4>Layout Editor</h4>
             <div class="input-group input-group-sm mb-3">
                 <span class="input-group-text" id="inputGroup-Mission-ID">ID</span>
-                <input type="text" class="form-control" aria-label="Mission ID" aria-describedby="inputGroup-Mission-ID"
+                <input type="text" class="form-control" aria-label="Mission ID" id="MissionID"
+                    onchange="globalThis.ValuesUpdated()" aria-describedby="inputGroup-Mission-ID"
                     placeholder="Mission ID">
 
             </div>
             <div class="input-group input-group-sm mb-3">
                 <span class="input-group-text" id="inputGroup-Mission-Name">Name</span>
-                <input type="text" class="form-control" aria-label="Mission Name"
-                    aria-describedby="inputGroup-Mission-Name" placeholder="Mission Name">
+                <input type="text" class="form-control" aria-label="Mission Name" onchange="globalThis.ValuesUpdated()"
+                    aria-describedby="inputGroup-Mission-Name" id="MissionName" placeholder="Mission Name">
             </div>
             <div class="input-group input-group-sm mb-3">
                 <span class="input-group-text" id="inputGroup-Mission-Description">Description</span>
                 <input type="text" class="form-control" aria-label="Mission Description"
-                    aria-describedby="inputGroup-Mission-Description" placeholder="Mission Description">
+                    onchange="globalThis.ValuesUpdated()" aria-describedby="inputGroup-Mission-Description"
+                    id="MissionDescription" placeholder="Mission Description">
             </div>
             <div class="Stages">
                 <h5>Mission Stages</h5>
@@ -569,21 +680,30 @@ https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js
             <h5>Mission Rewards</h5>
             <div class="input-group">
                 <span class="input-group-text">Science</span>
-                <input type="number" aria-label="Low" class="form-control" placeholder="Scale low">
-                <input type="number" aria-label="High" class="form-control" placeholder="Scale high">
-                <input type="text" aria-label="Value" class="form-control" placeholder="Scale value">
+                <input type="number" aria-label="Low" class="form-control" id="ScienceScaleLow"
+                    onchange="globalThis.ValuesUpdated()" placeholder="Scale low">
+                <input type="number" aria-label="High" class="form-control" id="ScienceScaleHigh"
+                    onchange="globalThis.ValuesUpdated()" placeholder="Scale high">
+                <input type="text" aria-label="Value" class="form-control" id="ScienceScaleValue"
+                    onchange="globalThis.ValuesUpdated()" placeholder="Scale value">
             </div>
             <div class="input-group">
                 <span class="input-group-text">Funds   </span>
-                <input type="number" aria-label="Low" class="form-control" placeholder="Scale low">
-                <input type="number" aria-label="High" class="form-control" placeholder="Scale high">
-                <input type="text" aria-label="Value" class="form-control" placeholder="Scale value">
+                <input type="number" aria-label="Low" class="form-control" id="FundsScaleLow"
+                    onchange="globalThis.ValuesUpdated()" placeholder="Scale low">
+                <input type="number" aria-label="High" class="form-control" id="FundsScaleHigh"
+                    onchange="globalThis.ValuesUpdated()" placeholder="Scale high">
+                <input type="text" aria-label="Value" class="form-control" id="FundsScaleValue"
+                    onchange="globalThis.ValuesUpdated()" placeholder="Scale value">
             </div>
             <div class="input-group">
                 <span class="input-group-text">Budget</span>
-                <input type="number" aria-label="Low" class="form-control" placeholder="Scale low">
-                <input type="number" aria-label="High" class="form-control" placeholder="Scale high">
-                <input type="text" aria-label="Value" class="form-control" placeholder="Scale value">
+                <input type="number" aria-label="Low" class="form-control" id="BudgetScaleLow"
+                    onchange="globalThis.ValuesUpdated()" placeholder="Scale low">
+                <input type="number" aria-label="High" class="form-control" id="BudgetScaleHigh"
+                    onchange="globalThis.ValuesUpdated()" placeholder="Scale high">
+                <input type="text" aria-label="Value" class="form-control" id="BudgetScaleValue"
+                    onchange="globalThis.ValuesUpdated()" placeholder="Scale value">
             </div>
         </div>
         <div class="panel" id="Mbox2">
