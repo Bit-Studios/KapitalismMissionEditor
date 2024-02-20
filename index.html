@@ -613,7 +613,7 @@ https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js
 
         }
         globalThis.ExportGF = function(){
-            var blob = new Blob(["JSON.stringify(globalThis.Data)"], {type: "application/json;charset=utf-8"});
+            var blob = new Blob([JSON.stringify(globalThis.Data)], {type: "application/json;charset=utf-8"});
             saveAs(blob, `${globalThis.Data.Mission.ID}.json`);
         }
     </script>
